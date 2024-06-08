@@ -1,16 +1,18 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.Models
 {
     public class StockLevel
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
-        public string ProductId { get; set; }
-        public string WarehouseId { get; set; }
+        public int ProductId { get; set; }
+        public Product? Product { get; set; }
+
+        public int WarehouseId { get; set; }
+        public Warehouse? Warehouse { get; set; }
+
+        [Required]
         public int Quantity { get; set; }
     }
 }

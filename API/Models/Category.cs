@@ -1,15 +1,17 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.Models
 {
     public class Category
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
-        [BsonElement("CategoryName")]
-        public string CategoryName { get; set; }
+        [Required]
+        public string Name { get; set; } = string.Empty;
+
+        public string Description { get; set; } = string.Empty; 
+
+        public ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

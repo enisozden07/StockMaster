@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using API.Models;
 using API.Services;
-using System.Collections.Generic;
 
 namespace API.Controllers
 {
@@ -17,47 +18,45 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<StockLevel>> Get() => _stockLevelService.Get();
+        public async Task<ActionResult<IEnumerable<StockLevel>>> GetStockLevels()
+        {
+            var stockLevels = await _stockLevelService.GetStockLevels();
+            return Ok(stockLevels);
+        }
 
         [HttpGet("{id}")]
-        public ActionResult<StockLevel> Get(int id)
+        public async Task<ActionResult<StockLevel>> GetStockLevel(int id)
         {
-            var stockLevel = _stockLevelService.Get(id);
+            var stockLevel = await _stockLevelService.GetStockLevelById(id);
             if (stockLevel == null)
             {
                 return NotFound();
             }
-            return stockLevel;
+            return Ok(stockLevel);
         }
 
         [HttpPost]
-        public ActionResult<StockLevel> Create(StockLevel stockLevel)
+        public async Task<ActionResult<StockLevel>> AddStockLevel(StockLevel stockLevel)
         {
-            _stockLevelService.Create(stockLevel);
-            return CreatedAtAction(nameof(Get), new { id = stockLevel.Id }, stockLevel);
+            var createdStockLevel = await _stockLevelService.AddStockLevel(stockLevel);
+            return CreatedAtAction(nameof(GetStockLevel), new { id = createdStockLevel.Id }, createdStockLevel);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, StockLevel stockLevel)
+        public async Task<IActionResult> UpdateStockLevel(int id, StockLevel stockLevel)
         {
-            var existingStockLevel = _stockLevelService.Get(id);
-            if (existingStockLevel == null)
+            if (id != stockLevel.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
-            _stockLevelService.Update(id, stockLevel);
+            await _stockLevelService.UpdateStockLevel(stockLevel);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteStockLevel(int id)
         {
-            var stockLevel = _stockLevelService.Get(id);
-            if (stockLevel == null)
-            {
-                return NotFound();
-            }
-            _stockLevelService.Delete(id);
+            await _stockLevelService.DeleteStockLevel(id);
             return NoContent();
         }
     }

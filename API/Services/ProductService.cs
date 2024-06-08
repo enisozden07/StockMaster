@@ -1,35 +1,66 @@
-using MongoDB.Driver;
-using API.Models;
 using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using MySql.Data.MySqlClient;
+using API.Models;
 
 namespace API.Services
 {
     public class ProductService
     {
-        private readonly IMongoCollection<Product> _products;
+        private readonly string? _connectionString;
 
-        public ProductService(IMongoDBSettings settings)
+        public ProductService(IConfiguration configuration)
         {
-            var client = new MongoClient(settings.ConnectionString);
-            var database = client.GetDatabase(settings.DatabaseName);
-
-            _products = database.GetCollection<Product>("Products");
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public List<Product> Get() => _products.Find(product => true).ToList();
-
-        public Product Get(string id) => _products.Find<Product>(product => product.Id == id).FirstOrDefault();
-
-        public Product Create(Product product)
+        public async Task<IEnumerable<Product>> GetProducts()
         {
-            _products.InsertOne(product);
-            return product;
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "SELECT * FROM Products";
+                return await connection.QueryAsync<Product>(query);
+            }
         }
 
-        public void Update(string id, Product productIn) => _products.ReplaceOne(product => product.Id == id, productIn);
+        public async Task<Product?> GetProductById(int id)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "SELECT * FROM Products WHERE Id = @Id";
+                return await connection.QueryFirstOrDefaultAsync<Product>(query, new { Id = id });
+            }
+        }
 
-        public void Remove(Product productIn) => _products.DeleteOne(product => product.Id == productIn.Id);
+        public async Task<Product> AddProduct(Product product)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "INSERT INTO Products (Name, Description, Price, CategoryId) VALUES (@Name, @Description, @Price, @CategoryId)";
+                await connection.ExecuteAsync(query, product);
+                return product;
+            }
+        }
 
-        public void Remove(string id) => _products.DeleteOne(product => product.Id == id);
+        public async Task UpdateProduct(Product product)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "UPDATE Products SET Name = @Name, Description = @Description, Price = @Price, CategoryId = @CategoryId WHERE Id = @Id";
+                await connection.ExecuteAsync(query, product);
+            }
+        }
+
+        public async Task DeleteProduct(int id)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "DELETE FROM Products WHERE Id = @Id";
+                await connection.ExecuteAsync(query, new { Id = id });
+            }
+        }
     }
 }

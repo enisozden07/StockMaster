@@ -1,51 +1,65 @@
-using API.Models;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
+using System.Threading.Tasks;
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using MySql.Data.MySqlClient;
+using API.Models;
 
 namespace API.Services
 {
     public class CategoryService
     {
-        private readonly DataContext _context;
+        private readonly string? _connectionString;
 
-        public CategoryService(DataContext context)
+        public CategoryService(IConfiguration configuration)
         {
-            _context = context;
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public List<Category> Get()
+        public async Task<IEnumerable<Category>> GetCategories()
         {
-            return _context.Categories.ToList();
-        }
-
-        public Category Get(int id)
-        {
-            return _context.Categories.Find(id);
-        }
-
-        public void Create(Category category)
-        {
-            _context.Categories.Add(category);
-            _context.SaveChanges();
-        }
-
-        public void Update(int id, Category category)
-        {
-            var existingCategory = _context.Categories.Find(id);
-            if (existingCategory != null)
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                existingCategory.CategoryName = category.CategoryName;
-                _context.SaveChanges();
+                var query = "SELECT * FROM Categories";
+                return await connection.QueryAsync<Category>(query);
             }
         }
 
-        public void Delete(int id)
+        public async Task<Category?> GetCategoryById(int id)
         {
-            var category = _context.Categories.Find(id);
-            if (category != null)
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                _context.Categories.Remove(category);
-                _context.SaveChanges();
+                var query = "SELECT * FROM Categories WHERE Id = @Id";
+                return await connection.QueryFirstOrDefaultAsync<Category>(query, new { Id = id });
+            }
+        }
+
+        public async Task<Category> AddCategory(Category category)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "INSERT INTO Categories (Name, Description) VALUES (@Name, @Description)";
+                await connection.ExecuteAsync(query, category);
+                return category;
+            }
+        }
+
+        public async Task UpdateCategory(Category category)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "UPDATE Categories SET Name = @Name, Description = @Description WHERE Id = @Id";
+                await connection.ExecuteAsync(query, category);
+            }
+        }
+
+        public async Task DeleteCategory(int id)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "DELETE FROM Categories WHERE Id = @Id";
+                await connection.ExecuteAsync(query, new { Id = id });
             }
         }
     }

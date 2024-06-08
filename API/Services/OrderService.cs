@@ -1,53 +1,65 @@
-using API.Models;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
+using System.Threading.Tasks;
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using MySql.Data.MySqlClient;
+using API.Models;
 
 namespace API.Services
 {
     public class OrderService
     {
-        private readonly DataContext _context;
+        private readonly string? _connectionString;
 
-        public OrderService(DataContext context)
+        public OrderService(IConfiguration configuration)
         {
-            _context = context;
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public List<Order> Get()
+        public async Task<IEnumerable<Order>> GetOrders()
         {
-            return _context.Orders.ToList();
-        }
-
-        public Order Get(int id)
-        {
-            return _context.Orders.Find(id);
-        }
-
-        public void Create(Order order)
-        {
-            _context.Orders.Add(order);
-            _context.SaveChanges();
-        }
-
-        public void Update(int id, Order order)
-        {
-            var existingOrder = _context.Orders.Find(id);
-            if (existingOrder != null)
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                existingOrder.CustomerId = order.CustomerId;
-                existingOrder.OrderDate = order.OrderDate;
-                existingOrder.TotalAmount = order.TotalAmount;
-                _context.SaveChanges();
+                var query = "SELECT * FROM Orders";
+                return await connection.QueryAsync<Order>(query);
             }
         }
 
-        public void Delete(int id)
+        public async Task<Order?> GetOrderById(int id)
         {
-            var order = _context.Orders.Find(id);
-            if (order != null)
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                _context.Orders.Remove(order);
-                _context.SaveChanges();
+                var query = "SELECT * FROM Orders WHERE Id = @Id";
+                return await connection.QueryFirstOrDefaultAsync<Order>(query, new { Id = id });
+            }
+        }
+
+        public async Task<Order> AddOrder(Order order)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "INSERT INTO Orders (OrderDate, ShippedDate, CustomerId) VALUES (@OrderDate, @ShippedDate, @CustomerId)";
+                await connection.ExecuteAsync(query, order);
+                return order;
+            }
+        }
+
+        public async Task UpdateOrder(Order order)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "UPDATE Orders SET OrderDate = @OrderDate, ShippedDate = @ShippedDate, CustomerId = @CustomerId WHERE Id = @Id";
+                await connection.ExecuteAsync(query, order);
+            }
+        }
+
+        public async Task DeleteOrder(int id)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "DELETE FROM Orders WHERE Id = @Id";
+                await connection.ExecuteAsync(query, new { Id = id });
             }
         }
     }

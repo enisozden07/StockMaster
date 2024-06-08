@@ -1,52 +1,65 @@
-using API.Models;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
+using System.Threading.Tasks;
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using MySql.Data.MySqlClient;
+using API.Models;
 
 namespace API.Services
 {
     public class SupplierService
     {
-        private readonly DataContext _context;
+        private readonly string? _connectionString;
 
-        public SupplierService(DataContext context)
+        public SupplierService(IConfiguration configuration)
         {
-            _context = context;
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public List<Supplier> Get()
+        public async Task<IEnumerable<Supplier>> GetSuppliers()
         {
-            return _context.Suppliers.ToList();
-        }
-
-        public Supplier Get(int id)
-        {
-            return _context.Suppliers.Find(id);
-        }
-
-        public void Create(Supplier supplier)
-        {
-            _context.Suppliers.Add(supplier);
-            _context.SaveChanges();
-        }
-
-        public void Update(int id, Supplier supplier)
-        {
-            var existingSupplier = _context.Suppliers.Find(id);
-            if (existingSupplier != null)
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                existingSupplier.SupplierName = supplier.SupplierName;
-                existingSupplier.ContactInfo = supplier.ContactInfo;
-                _context.SaveChanges();
+                var query = "SELECT * FROM Suppliers";
+                return await connection.QueryAsync<Supplier>(query);
             }
         }
 
-        public void Delete(int id)
+        public async Task<Supplier?> GetSupplierById(int id)
         {
-            var supplier = _context.Suppliers.Find(id);
-            if (supplier != null)
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                _context.Suppliers.Remove(supplier);
-                _context.SaveChanges();
+                var query = "SELECT * FROM Suppliers WHERE Id = @Id";
+                return await connection.QueryFirstOrDefaultAsync<Supplier>(query, new { Id = id });
+            }
+        }
+
+        public async Task<Supplier> AddSupplier(Supplier supplier)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "INSERT INTO Suppliers (Name, ContactInfo) VALUES (@Name, @ContactInfo)";
+                await connection.ExecuteAsync(query, supplier);
+                return supplier;
+            }
+        }
+
+        public async Task UpdateSupplier(Supplier supplier)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "UPDATE Suppliers SET Name = @Name, ContactInfo = @ContactInfo WHERE Id = @Id";
+                await connection.ExecuteAsync(query, supplier);
+            }
+        }
+
+        public async Task DeleteSupplier(int id)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "DELETE FROM Suppliers WHERE Id = @Id";
+                await connection.ExecuteAsync(query, new { Id = id });
             }
         }
     }

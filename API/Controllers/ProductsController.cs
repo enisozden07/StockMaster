@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using API.Models;
 using API.Services;
-using System.Collections.Generic;
 
 namespace API.Controllers
 {
@@ -17,55 +18,45 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Product>> Get() => _productService.Get();
-
-        [HttpGet("{id:length(24)}", Name = "GetProduct")]
-        public ActionResult<Product> Get(string id)
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
-            var product = _productService.Get(id);
+            var products = await _productService.GetProducts();
+            return Ok(products);
+        }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Product>> GetProduct(int id)
+        {
+            var product = await _productService.GetProductById(id);
             if (product == null)
             {
                 return NotFound();
             }
-
-            return product;
+            return Ok(product);
         }
 
         [HttpPost]
-        public ActionResult<Product> Create(Product product)
+        public async Task<ActionResult<Product>> AddProduct(Product product)
         {
-            _productService.Create(product);
-            return CreatedAtRoute("GetProduct", new { id = product.Id.ToString() }, product);
+            var createdProduct = await _productService.AddProduct(product);
+            return CreatedAtAction(nameof(GetProduct), new { id = createdProduct.Id }, createdProduct);
         }
 
-        [HttpPut("{id:length(24)}")]
-        public IActionResult Update(string id, Product productIn)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct(int id, Product product)
         {
-            var product = _productService.Get(id);
-
-            if (product == null)
+            if (id != product.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
-
-            _productService.Update(id, productIn);
-
+            await _productService.UpdateProduct(product);
             return NoContent();
         }
 
-        [HttpDelete("{id:length(24)}")]
-        public IActionResult Delete(string id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
         {
-            var product = _productService.Get(id);
-
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            _productService.Remove(product.Id);
-
+            await _productService.DeleteProduct(id);
             return NoContent();
         }
     }

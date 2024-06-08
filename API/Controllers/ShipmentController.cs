@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using API.Models;
 using API.Services;
-using System.Collections.Generic;
 
 namespace API.Controllers
 {
@@ -17,47 +18,45 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Shipment>> Get() => _shipmentService.Get();
+        public async Task<ActionResult<IEnumerable<Shipment>>> GetShipments()
+        {
+            var shipments = await _shipmentService.GetShipments();
+            return Ok(shipments);
+        }
 
         [HttpGet("{id}")]
-        public ActionResult<Shipment> Get(int id)
+        public async Task<ActionResult<Shipment>> GetShipment(int id)
         {
-            var shipment = _shipmentService.Get(id);
+            var shipment = await _shipmentService.GetShipmentById(id);
             if (shipment == null)
             {
                 return NotFound();
             }
-            return shipment;
+            return Ok(shipment);
         }
 
         [HttpPost]
-        public ActionResult<Shipment> Create(Shipment shipment)
+        public async Task<ActionResult<Shipment>> AddShipment(Shipment shipment)
         {
-            _shipmentService.Create(shipment);
-            return CreatedAtAction(nameof(Get), new { id = shipment.Id }, shipment);
+            var createdShipment = await _shipmentService.AddShipment(shipment);
+            return CreatedAtAction(nameof(GetShipment), new { id = createdShipment.Id }, createdShipment);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Shipment shipment)
+        public async Task<IActionResult> UpdateShipment(int id, Shipment shipment)
         {
-            var existingShipment = _shipmentService.Get(id);
-            if (existingShipment == null)
+            if (id != shipment.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
-            _shipmentService.Update(id, shipment);
+            await _shipmentService.UpdateShipment(shipment);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteShipment(int id)
         {
-            var shipment = _shipmentService.Get(id);
-            if (shipment == null)
-            {
-                return NotFound();
-            }
-            _shipmentService.Delete(id);
+            await _shipmentService.DeleteShipment(id);
             return NoContent();
         }
     }

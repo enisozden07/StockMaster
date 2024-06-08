@@ -1,52 +1,65 @@
-using API.Models;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
+using System.Threading.Tasks;
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using MySql.Data.MySqlClient;
+using API.Models;
 
 namespace API.Services
 {
     public class CustomerService
     {
-        private readonly DataContext _context;
+        private readonly string? _connectionString;
 
-        public CustomerService(DataContext context)
+        public CustomerService(IConfiguration configuration)
         {
-            _context = context;
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public List<Customer> Get()
+        public async Task<IEnumerable<Customer>> GetCustomers()
         {
-            return _context.Customers.ToList();
-        }
-
-        public Customer Get(int id)
-        {
-            return _context.Customers.Find(id);
-        }
-
-        public void Create(Customer customer)
-        {
-            _context.Customers.Add(customer);
-            _context.SaveChanges();
-        }
-
-        public void Update(int id, Customer customer)
-        {
-            var existingCustomer = _context.Customers.Find(id);
-            if (existingCustomer != null)
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                existingCustomer.CustomerName = customer.CustomerName;
-                existingCustomer.ContactInfo = customer.ContactInfo;
-                _context.SaveChanges();
+                var query = "SELECT * FROM Customers";
+                return await connection.QueryAsync<Customer>(query);
             }
         }
 
-        public void Delete(int id)
+        public async Task<Customer?> GetCustomerById(int id)
         {
-            var customer = _context.Customers.Find(id);
-            if (customer != null)
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                _context.Customers.Remove(customer);
-                _context.SaveChanges();
+                var query = "SELECT * FROM Customers WHERE Id = @Id";
+                return await connection.QueryFirstOrDefaultAsync<Customer>(query, new { Id = id });
+            }
+        }
+
+        public async Task<Customer> AddCustomer(Customer customer)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "INSERT INTO Customers (Name, Email, Phone, Address) VALUES (@Name, @Email, @Phone, @Address)";
+                await connection.ExecuteAsync(query, customer);
+                return customer;
+            }
+        }
+
+        public async Task UpdateCustomer(Customer customer)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "UPDATE Customers SET Name = @Name, Email = @Email, Phone = @Phone, Address = @Address WHERE Id = @Id";
+                await connection.ExecuteAsync(query, customer);
+            }
+        }
+
+        public async Task DeleteCustomer(int id)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "DELETE FROM Customers WHERE Id = @Id";
+                await connection.ExecuteAsync(query, new { Id = id });
             }
         }
     }

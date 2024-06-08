@@ -1,16 +1,22 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.Models
 {
     public class Order
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
-        public string CustomerId { get; set; }
+        [Required]
         public DateTime OrderDate { get; set; }
-        public decimal TotalAmount { get; set; }
+
+        public DateTime? ShippedDate { get; set; } 
+
+        public int CustomerId { get; set; }
+        public Customer? Customer { get; set; }
+
+        public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        public ICollection<Shipment> Shipments { get; set; } = new List<Shipment>();
     }
 }

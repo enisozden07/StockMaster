@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using API.Models;
 using API.Services;
-using System.Collections.Generic;
 
 namespace API.Controllers
 {
@@ -17,47 +18,45 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Warehouse>> Get() => _warehouseService.Get();
+        public async Task<ActionResult<IEnumerable<Warehouse>>> GetWarehouses()
+        {
+            var warehouses = await _warehouseService.GetWarehouses();
+            return Ok(warehouses);
+        }
 
         [HttpGet("{id}")]
-        public ActionResult<Warehouse> Get(int id)
+        public async Task<ActionResult<Warehouse>> GetWarehouse(int id)
         {
-            var warehouse = _warehouseService.Get(id);
+            var warehouse = await _warehouseService.GetWarehouseById(id);
             if (warehouse == null)
             {
                 return NotFound();
             }
-            return warehouse;
+            return Ok(warehouse);
         }
 
         [HttpPost]
-        public ActionResult<Warehouse> Create(Warehouse warehouse)
+        public async Task<ActionResult<Warehouse>> AddWarehouse(Warehouse warehouse)
         {
-            _warehouseService.Create(warehouse);
-            return CreatedAtAction(nameof(Get), new { id = warehouse.Id }, warehouse);
+            var createdWarehouse = await _warehouseService.AddWarehouse(warehouse);
+            return CreatedAtAction(nameof(GetWarehouse), new { id = createdWarehouse.Id }, createdWarehouse);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Warehouse warehouse)
+        public async Task<IActionResult> UpdateWarehouse(int id, Warehouse warehouse)
         {
-            var existingWarehouse = _warehouseService.Get(id);
-            if (existingWarehouse == null)
+            if (id != warehouse.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
-            _warehouseService.Update(id, warehouse);
+            await _warehouseService.UpdateWarehouse(warehouse);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteWarehouse(int id)
         {
-            var warehouse = _warehouseService.Get(id);
-            if (warehouse == null)
-            {
-                return NotFound();
-            }
-            _warehouseService.Delete(id);
+            await _warehouseService.DeleteWarehouse(id);
             return NoContent();
         }
     }

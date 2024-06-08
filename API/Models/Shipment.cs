@@ -1,16 +1,21 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.Models
 {
     public class Shipment
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
-        public string OrderId { get; set; }
+        [Required]
         public DateTime ShipmentDate { get; set; }
-        public string DeliveryStatus { get; set; }
+
+        public string TrackingNumber { get; set; } = string.Empty;
+
+        public int OrderId { get; set; }
+        public Order? Order { get; set; }
+
+        public int SupplierId { get; set; }
+        public Supplier? Supplier { get; set; }
     }
 }

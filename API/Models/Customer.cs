@@ -1,17 +1,19 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.Models
 {
     public class Customer
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
-        [BsonElement("CustomerName")]
-        public string CustomerName { get; set; }
+        [Required]
+        public string Name { get; set; } = string.Empty;
 
-        public string ContactInfo { get; set; }
+        public string Email { get; set; } = string.Empty; 
+        public string Phone { get; set; } = string.Empty; 
+        public string Address { get; set; } = string.Empty; 
+
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }

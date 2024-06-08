@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using API.Models;
 using API.Services;
-using System.Collections.Generic;
 
 namespace API.Controllers
 {
@@ -17,47 +18,45 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Supplier>> Get() => _supplierService.Get();
+        public async Task<ActionResult<IEnumerable<Supplier>>> GetSuppliers()
+        {
+            var suppliers = await _supplierService.GetSuppliers();
+            return Ok(suppliers);
+        }
 
         [HttpGet("{id}")]
-        public ActionResult<Supplier> Get(int id)
+        public async Task<ActionResult<Supplier>> GetSupplier(int id)
         {
-            var supplier = _supplierService.Get(id);
+            var supplier = await _supplierService.GetSupplierById(id);
             if (supplier == null)
             {
                 return NotFound();
             }
-            return supplier;
+            return Ok(supplier);
         }
 
         [HttpPost]
-        public ActionResult<Supplier> Create(Supplier supplier)
+        public async Task<ActionResult<Supplier>> AddSupplier(Supplier supplier)
         {
-            _supplierService.Create(supplier);
-            return CreatedAtAction(nameof(Get), new { id = supplier.Id }, supplier);
+            var createdSupplier = await _supplierService.AddSupplier(supplier);
+            return CreatedAtAction(nameof(GetSupplier), new { id = createdSupplier.Id }, createdSupplier);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Supplier supplier)
+        public async Task<IActionResult> UpdateSupplier(int id, Supplier supplier)
         {
-            var existingSupplier = _supplierService.Get(id);
-            if (existingSupplier == null)
+            if (id != supplier.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
-            _supplierService.Update(id, supplier);
+            await _supplierService.UpdateSupplier(supplier);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteSupplier(int id)
         {
-            var supplier = _supplierService.Get(id);
-            if (supplier == null)
-            {
-                return NotFound();
-            }
-            _supplierService.Delete(id);
+            await _supplierService.DeleteSupplier(id);
             return NoContent();
         }
     }

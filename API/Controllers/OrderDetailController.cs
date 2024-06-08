@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using API.Models;
 using API.Services;
-using System.Collections.Generic;
 
 namespace API.Controllers
 {
@@ -17,47 +18,45 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<OrderDetail>> Get() => _orderDetailService.Get();
+        public async Task<ActionResult<IEnumerable<OrderDetail>>> GetOrderDetails()
+        {
+            var orderDetails = await _orderDetailService.GetOrderDetails();
+            return Ok(orderDetails);
+        }
 
         [HttpGet("{id}")]
-        public ActionResult<OrderDetail> Get(int id)
+        public async Task<ActionResult<OrderDetail>> GetOrderDetail(int id)
         {
-            var orderDetail = _orderDetailService.Get(id);
+            var orderDetail = await _orderDetailService.GetOrderDetailById(id);
             if (orderDetail == null)
             {
                 return NotFound();
             }
-            return orderDetail;
+            return Ok(orderDetail);
         }
 
         [HttpPost]
-        public ActionResult<OrderDetail> Create(OrderDetail orderDetail)
+        public async Task<ActionResult<OrderDetail>> AddOrderDetail(OrderDetail orderDetail)
         {
-            _orderDetailService.Create(orderDetail);
-            return CreatedAtAction(nameof(Get), new { id = orderDetail.Id }, orderDetail);
+            var createdOrderDetail = await _orderDetailService.AddOrderDetail(orderDetail);
+            return CreatedAtAction(nameof(GetOrderDetail), new { id = createdOrderDetail.Id }, createdOrderDetail);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, OrderDetail orderDetail)
+        public async Task<IActionResult> UpdateOrderDetail(int id, OrderDetail orderDetail)
         {
-            var existingOrderDetail = _orderDetailService.Get(id);
-            if (existingOrderDetail == null)
+            if (id != orderDetail.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
-            _orderDetailService.Update(id, orderDetail);
+            await _orderDetailService.UpdateOrderDetail(orderDetail);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteOrderDetail(int id)
         {
-            var orderDetail = _orderDetailService.Get(id);
-            if (orderDetail == null)
-            {
-                return NotFound();
-            }
-            _orderDetailService.Delete(id);
+            await _orderDetailService.DeleteOrderDetail(id);
             return NoContent();
         }
     }

@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using API.Models;
 using API.Services;
-using System.Collections.Generic;
 
 namespace API.Controllers
 {
@@ -17,47 +18,45 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Order>> Get() => _orderService.Get();
+        public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
+        {
+            var orders = await _orderService.GetOrders();
+            return Ok(orders);
+        }
 
         [HttpGet("{id}")]
-        public ActionResult<Order> Get(int id)
+        public async Task<ActionResult<Order>> GetOrder(int id)
         {
-            var order = _orderService.Get(id);
+            var order = await _orderService.GetOrderById(id);
             if (order == null)
             {
                 return NotFound();
             }
-            return order;
+            return Ok(order);
         }
 
         [HttpPost]
-        public ActionResult<Order> Create(Order order)
+        public async Task<ActionResult<Order>> AddOrder(Order order)
         {
-            _orderService.Create(order);
-            return CreatedAtAction(nameof(Get), new { id = order.Id }, order);
+            var createdOrder = await _orderService.AddOrder(order);
+            return CreatedAtAction(nameof(GetOrder), new { id = createdOrder.Id }, createdOrder);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Order order)
+        public async Task<IActionResult> UpdateOrder(int id, Order order)
         {
-            var existingOrder = _orderService.Get(id);
-            if (existingOrder == null)
+            if (id != order.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
-            _orderService.Update(id, order);
+            await _orderService.UpdateOrder(order);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteOrder(int id)
         {
-            var order = _orderService.Get(id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-            _orderService.Delete(id);
+            await _orderService.DeleteOrder(id);
             return NoContent();
         }
     }

@@ -1,17 +1,17 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.Models
 {
     public class Warehouse
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
-        [BsonElement("WarehouseName")]
-        public string WarehouseName { get; set; }
+        [Required]
+        public string Location { get; set; } = string.Empty;
 
-        public string Location { get; set; }
+        public string Manager { get; set; } = string.Empty; 
+
+        public ICollection<StockLevel> StockLevels { get; set; } = new List<StockLevel>();
     }
 }

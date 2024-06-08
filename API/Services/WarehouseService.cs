@@ -1,52 +1,65 @@
-using API.Models;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
+using System.Threading.Tasks;
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using MySql.Data.MySqlClient;
+using API.Models;
 
 namespace API.Services
 {
     public class WarehouseService
     {
-        private readonly DataContext _context;
+        private readonly string? _connectionString;
 
-        public WarehouseService(DataContext context)
+        public WarehouseService(IConfiguration configuration)
         {
-            _context = context;
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public List<Warehouse> Get()
+        public async Task<IEnumerable<Warehouse>> GetWarehouses()
         {
-            return _context.Warehouses.ToList();
-        }
-
-        public Warehouse Get(int id)
-        {
-            return _context.Warehouses.Find(id);
-        }
-
-        public void Create(Warehouse warehouse)
-        {
-            _context.Warehouses.Add(warehouse);
-            _context.SaveChanges();
-        }
-
-        public void Update(int id, Warehouse warehouse)
-        {
-            var existingWarehouse = _context.Warehouses.Find(id);
-            if (existingWarehouse != null)
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                existingWarehouse.WarehouseName = warehouse.WarehouseName;
-                existingWarehouse.Location = warehouse.Location;
-                _context.SaveChanges();
+                var query = "SELECT * FROM Warehouses";
+                return await connection.QueryAsync<Warehouse>(query);
             }
         }
 
-        public void Delete(int id)
+        public async Task<Warehouse?> GetWarehouseById(int id)
         {
-            var warehouse = _context.Warehouses.Find(id);
-            if (warehouse != null)
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                _context.Warehouses.Remove(warehouse);
-                _context.SaveChanges();
+                var query = "SELECT * FROM Warehouses WHERE Id = @Id";
+                return await connection.QueryFirstOrDefaultAsync<Warehouse>(query, new { Id = id });
+            }
+        }
+
+        public async Task<Warehouse> AddWarehouse(Warehouse warehouse)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "INSERT INTO Warehouses (Location, Manager) VALUES (@Location, @Manager)";
+                await connection.ExecuteAsync(query, warehouse);
+                return warehouse;
+            }
+        }
+
+        public async Task UpdateWarehouse(Warehouse warehouse)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "UPDATE Warehouses SET Location = @Location, Manager = @Manager WHERE Id = @Id";
+                await connection.ExecuteAsync(query, warehouse);
+            }
+        }
+
+        public async Task DeleteWarehouse(int id)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var query = "DELETE FROM Warehouses WHERE Id = @Id";
+                await connection.ExecuteAsync(query, new { Id = id });
             }
         }
     }

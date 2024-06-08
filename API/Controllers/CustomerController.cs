@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using API.Models;
 using API.Services;
-using System.Collections.Generic;
 
 namespace API.Controllers
 {
@@ -17,47 +18,45 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Customer>> Get() => _customerService.Get();
+        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
+        {
+            var customers = await _customerService.GetCustomers();
+            return Ok(customers);
+        }
 
         [HttpGet("{id}")]
-        public ActionResult<Customer> Get(int id)
+        public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
-            var customer = _customerService.Get(id);
+            var customer = await _customerService.GetCustomerById(id);
             if (customer == null)
             {
                 return NotFound();
             }
-            return customer;
+            return Ok(customer);
         }
 
         [HttpPost]
-        public ActionResult<Customer> Create(Customer customer)
+        public async Task<ActionResult<Customer>> AddCustomer(Customer customer)
         {
-            _customerService.Create(customer);
-            return CreatedAtAction(nameof(Get), new { id = customer.Id }, customer);
+            var createdCustomer = await _customerService.AddCustomer(customer);
+            return CreatedAtAction(nameof(GetCustomer), new { id = createdCustomer.Id }, createdCustomer);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Customer customer)
+        public async Task<IActionResult> UpdateCustomer(int id, Customer customer)
         {
-            var existingCustomer = _customerService.Get(id);
-            if (existingCustomer == null)
+            if (id != customer.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
-            _customerService.Update(id, customer);
+            await _customerService.UpdateCustomer(customer);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteCustomer(int id)
         {
-            var customer = _customerService.Get(id);
-            if (customer == null)
-            {
-                return NotFound();
-            }
-            _customerService.Delete(id);
+            await _customerService.DeleteCustomer(id);
             return NoContent();
         }
     }
