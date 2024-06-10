@@ -1,6 +1,5 @@
 using API.Models;
 using API.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http.Extensions;
 
@@ -13,7 +12,6 @@ builder.Services.AddSwaggerGen();
 
 // Configure MySQL database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<DataContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 // Register custom services
 builder.Services.AddScoped<ProductService>();
