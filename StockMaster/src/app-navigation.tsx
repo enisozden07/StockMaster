@@ -1,17 +1,8 @@
 export const navigation = [
   {
-    text: 'Home',
-    path: '/home',
-    icon: 'home'
-  },
-  {
     text: 'Examples',
     icon: 'folder',
     items: [
-      {
-        text: 'Profile',
-        path: '/profile'
-      },
       {
         text: 'Tasks',
         path: '/tasks'
@@ -23,19 +14,38 @@ export const navigation = [
     path: '/dashboard',
     icon: 'folder'
   }, 
-  {
-    text: 'Product-Category',
-    path: '/product-category-management',
-    icon: 'folder'
-  }, 
-  {
-    text: 'Orders',
-    path: '/order-management-page',
-    icon: 'folder'
-  }, 
-  {
-    text: 'StockLevel',
-    path: '/stock-level-management',
-    icon: 'folder'
-  }
+{
+    text: 'Management',
+    icon: 'preferences',
+    items: [
+      {
+        text: 'Product',
+        path: '/product-management'
+      }, 
+      {
+        text: 'Category',
+        path: '/category-management'
+      }, 
+      {
+        text: 'Order',
+        path: '/order-management'
+      }, 
+      {
+        text: 'Customer',
+        path: '/customer-management'
+      }, 
+      {
+        text: 'Shipment',
+        path: '/shipment-management'
+      }, 
+      {
+        text: 'Supplier',
+        path: '/supplier-management'
+      }, 
+      {
+        text: 'Warehouse',
+        path: '/warehouse-management'
+      }
+    ]
+  },
   ];

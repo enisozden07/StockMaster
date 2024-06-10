@@ -15,11 +15,11 @@ namespace API.Controllers
             _dashboardService = dashboardService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<DashboardData>> GetDashboardData()
+        [HttpGet("data")]
+        public async Task<IActionResult> GetDashboardData()
         {
-            var dashboardData = await _dashboardService.GetDashboardDataAsync();
-            return Ok(dashboardData);
+            var data = await _dashboardService.GetDashboardDataAsync();
+            return Ok(data);
         }
     }
 }

@@ -1,7 +1,10 @@
-export { default as HomePage } from './home/home';
 export { default as ProfilePage } from './profile/profile';
 export { default as TasksPage } from './tasks/tasks';
 export { default as DashboardPage } from './dashboard/dashboard';
-export { default as ProductCategoryManagementPage } from './ProductCategoryManagement/ProductCategoryManagement';
-export { default as OrderManagementPagePage } from './OrderManagementPage/OrderManagementPage';
-export { default as StockLevelManagementPage } from './StockLevelManagement/StockLevelManagement';
+export { default as ProductManagementPage } from './ProductManagement/ProductManagement';
+export { default as CategoryManagementPage } from './CategoryManagement/CategoryManagement';
+export { default as OrderManagementPage } from './OrderManagement/OrderManagement';
+export { default as CustomerManagementPage } from './CustomerManagement/CustomerManagement';
+export { default as ShipmentManagementPage } from './ShipmentManagement/ShipmentManagement';
+export { default as SupplierManagementPage } from './SupplierManagement/SupplierManagement';
+export { default as WarehouseManagementPage } from './WarehouseManagement/WarehouseManagement';

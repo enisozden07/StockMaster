@@ -1,4 +1,4 @@
-import { HomePage, TasksPage, ProfilePage, DashboardPage, ProductCategoryManagementPage, OrderManagementPagePage, StockLevelManagementPage } from './pages';
+import { TasksPage, ProfilePage, DashboardPage,  ProductManagementPage, CategoryManagementPage, OrderManagementPage, CustomerManagementPage, ShipmentManagementPage, SupplierManagementPage, WarehouseManagementPage } from './pages';
 import { withNavigationWatcher } from './contexts/navigation';
 
 const routes = [
@@ -10,25 +10,37 @@ const routes = [
         path: '/profile',
         element: ProfilePage
     },
-    {
-        path: '/home',
-        element: HomePage
-    }, 
   {
     path: '/dashboard',
     element: DashboardPage
+  },
+  {
+    path: '/product-management',
+    element: ProductManagementPage
   }, 
   {
-    path: '/product-category-management',
-    element: ProductCategoryManagementPage
+    path: '/category-management',
+    element: CategoryManagementPage
   }, 
   {
-    path: '/order-management-page',
-    element: OrderManagementPagePage
+    path: '/order-management',
+    element: OrderManagementPage
   }, 
   {
-    path: '/stock-level-management',
-    element: StockLevelManagementPage
+    path: '/customer-management',
+    element: CustomerManagementPage
+  }, 
+  {
+    path: '/shipment-management',
+    element: ShipmentManagementPage
+  }, 
+  {
+    path: '/supplier-management',
+    element: SupplierManagementPage
+  }, 
+  {
+    path: '/warehouse-management',
+    element: WarehouseManagementPage
   }
 ];
 
