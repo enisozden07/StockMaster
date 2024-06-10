@@ -1,15 +1,5 @@
 export const navigation = [
   {
-    text: 'Examples',
-    icon: 'folder',
-    items: [
-      {
-        text: 'Tasks',
-        path: '/tasks'
-      }
-    ]
-  }, 
-  {
     text: 'Dashboard',
     path: '/dashboard',
     icon: 'folder'

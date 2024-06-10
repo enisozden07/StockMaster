@@ -1,155 +1,175 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import DataGrid, { Column } from 'devextreme-react/data-grid';
-import Chart, {
-  ArgumentAxis,
-  ValueAxis,
-  Series,
-  Label,
-  Legend,
-  Export,
-  Title,
-  Tooltip
-} from 'devextreme-react/chart';
-import PieChart, {
-  Series as PieSeries,
-  Label as PieLabel,
-  Connector,
-  Size
-} from 'devextreme-react/pie-chart';
-import Funnel, {
-  Label as FunnelLabel,
-  Tooltip as FunnelTooltip
-} from 'devextreme-react/funnel';
-import './dashboard.scss';
+import React, { useState, useEffect } from 'react';
+import api from '../../axiosConfig';
+import DataGrid, { Column, Paging, Pager } from 'devextreme-react/data-grid';
+import Chart, { ArgumentAxis, ValueAxis, Series, Label, Legend, Export, Title, Tooltip } from 'devextreme-react/chart';
+import PieChart, { Series as PieSeries, Label as PieLabel, Connector, Size } from 'devextreme-react/pie-chart';
+import Funnel, { Label as FunnelLabel, Tooltip as FunnelTooltip } from 'devextreme-react/funnel';
+import 'devextreme/dist/css/dx.light.css';
+import './dashboard.scss'; 
 
-const DashboardPage = () => {
-  const [dashboardData, setDashboardData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const Dashboard = () => {
+  const [metrics, setMetrics] = useState({
+    totalProducts: 0,
+    totalOrders: 0,
+    totalCustomers: 0,
+    totalShipments: 0,
+  });
+
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [recentShipments, setRecentShipments] = useState([]);
+  const [productDistribution, setProductDistribution] = useState([]);
+  const [salesFunnel, setSalesFunnel] = useState([]);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const response = await axios.get('https://localhost:7100/api/dashboard');
-        console.log('Dashboard Data:', response.data); // Log data to verify
-        setDashboardData(response.data);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        setError('Error fetching dashboard data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
+    fetchMetrics();
+    fetchRecentOrders();
+    fetchRecentShipments();
+    fetchProductDistribution();
+    fetchSalesFunnel();
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const fetchMetrics = async () => {
+    try {
+      const response = await api.get('/api/dashboard/metrics');
+      setMetrics(response.data);
+    } catch (error) {
+      console.error('Error fetching metrics:', error);
+    }
+  };
 
-  if (error) {
-    return <div>{error}</div>;
-  }
+  const fetchRecentOrders = async () => {
+    try {
+      const response = await api.get('/api/dashboard/recent-orders');
+      setRecentOrders(response.data);
+    } catch (error) {
+      console.error('Error fetching recent orders:', error);
+    }
+  };
 
-  if (!dashboardData) {
-    return <div>No data available</div>;
-  }
+  const fetchRecentShipments = async () => {
+    try {
+      const response = await api.get('/api/dashboard/recent-shipments');
+      setRecentShipments(response.data);
+    } catch (error) {
+      console.error('Error fetching recent shipments:', error);
+    }
+  };
 
-  const {
-    Opportunities,
-    RevenueTotal,
-    Conversion,
-    Leads,
-    RevenueAnalysis,
-    ConversionFunnel,
-    RevenueSnapshot
-  } = dashboardData;
+  const fetchProductDistribution = async () => {
+    try {
+      const response = await api.get('/api/dashboard/product-distribution');
+      setProductDistribution(response.data);
+    } catch (error) {
+      console.error('Error fetching product distribution:', error);
+    }
+  };
+
+  const fetchSalesFunnel = async () => {
+    try {
+      const response = await api.get('/api/dashboard/sales-funnel');
+      setSalesFunnel(response.data);
+    } catch (error) {
+      console.error('Error fetching sales funnel:', error);
+    }
+  };
 
   return (
     <div className="dashboard">
-      <h4>Dashboard</h4>
       <div className="dashboard-metrics">
         <div className="metric-card">
-          <h5>Opportunities</h5>
-          <p>${Opportunities}</p>
+          <h5>Total Products</h5>
+          <p>{metrics.totalProducts}</p>
         </div>
         <div className="metric-card">
-          <h5>Revenue Total</h5>
-          <p>${RevenueTotal}</p>
+          <h5>Total Orders</h5>
+          <p>{metrics.totalOrders}</p>
         </div>
         <div className="metric-card">
-          <h5>Conversion</h5>
-          <p>{Conversion}%</p>
+          <h5>Total Customers</h5>
+          <p>{metrics.totalCustomers}</p>
         </div>
         <div className="metric-card">
-          <h5>Leads</h5>
-          <p>{Leads}</p>
+          <h5>Total Shipments</h5>
+          <p>{metrics.totalShipments}</p>
         </div>
       </div>
+
       <div className="dashboard-charts">
-        <div className="dashboard-cards">
-          <Chart
-            title="Revenue Analysis"
-            dataSource={RevenueAnalysis}
-            id="chart"
-          >
+        <div id="chart">
+          <Chart dataSource={recentOrders} title="Sales Overview">
             <ArgumentAxis>
-              <Label />
+              <Label rotationAngle={45} overlappingBehavior="rotate" />
             </ArgumentAxis>
             <ValueAxis>
-              <Label />
+              <Title text="Number of Orders" />
             </ValueAxis>
             <Series
-              valueField="revenue"
-              argumentField="month"
-              type="line"
-              color="#ffaa66"
+              type="bar"
+              argumentField="orderDate"
+              valueField="orderCount"
             />
-            <Legend verticalAlignment="bottom" horizontalAlignment="center" />
-            <Export enabled={true} />
-            <Title text="Revenue Analysis" />
             <Tooltip enabled={true} />
+            <Legend visible={false} />
+            <Export enabled={true} />
           </Chart>
         </div>
-        <div className="dashboard-cards">
-          <Funnel
-            id="funnel"
-            title="Conversion Funnel"
-            dataSource={ConversionFunnel}
-            argumentField="stage"
-            valueField="value"
-          >
-            <FunnelTooltip enabled={true} />
-            <FunnelLabel visible={true} />
-          </Funnel>
-        </div>
-      </div>
-      <div className="dashboard-grids">
-        <div className="dashboard-cards">
-          <PieChart
-            id="pie"
-            dataSource={RevenueSnapshot}
-            title="Revenue Snapshot (All Products)"
-          >
-            <PieSeries argumentField="category" valueField="value">
-              <PieLabel visible={true}>
+
+        <div id="pie">
+          <PieChart dataSource={productDistribution} type="doughnut">
+            <PieSeries
+              argumentField="productName"
+              valueField="quantity"
+            >
+              <PieLabel visible={true} position="columns" customizeText={(pointInfo) => `${pointInfo.argument}: ${pointInfo.value}`}>
                 <Connector visible={true} />
               </PieLabel>
             </PieSeries>
-            <Size height={400} />
+            <Size width={500} />
           </PieChart>
         </div>
-        <div className="dashboard-cards">
-          <DataGrid dataSource={RevenueAnalysis} keyExpr="month">
-            <Column dataField="month" caption="Month" />
-            <Column dataField="revenue" caption="Revenue" />
-          </DataGrid>
+      </div>
+
+      <div className="dashboard-grids">
+        <div id="funnel">
+          <Funnel id="funnel" dataSource={salesFunnel} valueField="count" argumentField="stage">
+            <FunnelLabel
+              visible={true}
+              position="inside"
+              format="fixedPoint"
+              customizeText={(itemInfo) => `${itemInfo.valueText} (${itemInfo.percentText})`}
+            />
+            <FunnelTooltip enabled={true} />
+          </Funnel>
         </div>
       </div>
+
+      <h2>Recent Orders</h2>
+      <DataGrid
+        dataSource={recentOrders}
+        showBorders={true}
+        columnAutoWidth={true}
+      >
+        <Column dataField="id" caption="Order ID" />
+        <Column dataField="orderDate" caption="Order Date" dataType="date" format="yyyy-MM-dd" />
+        <Column dataField="customerName" caption="Customer" />
+        <Paging defaultPageSize={5} />
+        <Pager showPageSizeSelector={true} allowedPageSizes={[5, 10, 20]} showInfo={true} />
+      </DataGrid>
+
+      <h2>Recent Shipments</h2>
+      <DataGrid
+        dataSource={recentShipments}
+        showBorders={true}
+        columnAutoWidth={true}
+      >
+        <Column dataField="id" caption="Shipment ID" />
+        <Column dataField="shipmentDate" caption="Shipment Date" dataType="date" format="yyyy-MM-dd" />
+        <Column dataField="trackingNumber" caption="Tracking Number" />
+        <Paging defaultPageSize={5} />
+        <Pager showPageSizeSelector={true} allowedPageSizes={[5, 10, 20]} showInfo={true} />
+      </DataGrid>
     </div>
   );
 };
 
-export default DashboardPage;
+export default Dashboard;

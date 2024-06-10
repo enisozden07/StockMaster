@@ -1,5 +1,4 @@
 export { default as ProfilePage } from './profile/profile';
-export { default as TasksPage } from './tasks/tasks';
 export { default as DashboardPage } from './dashboard/dashboard';
 export { default as ProductManagementPage } from './ProductManagement/ProductManagement';
 export { default as CategoryManagementPage } from './CategoryManagement/CategoryManagement';

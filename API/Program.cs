@@ -23,7 +23,7 @@ builder.Services.AddScoped<ShipmentService>();
 builder.Services.AddScoped<StockLevelService>();
 builder.Services.AddScoped<SupplierService>();
 builder.Services.AddScoped<WarehouseService>();
-builder.Services.AddScoped<DashboardService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>

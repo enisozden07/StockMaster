@@ -1,6 +1,6 @@
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using API.Services;
+using System.Threading.Tasks;
+using API.Services; 
 
 namespace API.Controllers
 {
@@ -8,18 +8,46 @@ namespace API.Controllers
     [ApiController]
     public class DashboardController : ControllerBase
     {
-        private readonly DashboardService _dashboardService;
+        private readonly IDashboardService _dashboardService;
 
-        public DashboardController(DashboardService dashboardService)
+        public DashboardController(IDashboardService dashboardService)
         {
             _dashboardService = dashboardService;
         }
 
-        [HttpGet("data")]
-        public async Task<IActionResult> GetDashboardData()
+        [HttpGet("metrics")]
+        public async Task<IActionResult> GetMetrics()
         {
-            var data = await _dashboardService.GetDashboardDataAsync();
-            return Ok(data);
+            var metrics = await _dashboardService.GetMetricsAsync();
+            return Ok(metrics);
+        }
+
+        [HttpGet("recent-orders")]
+        public async Task<IActionResult> GetRecentOrders()
+        {
+            var recentOrders = await _dashboardService.GetRecentOrdersAsync();
+            return Ok(recentOrders);
+        }
+
+        [HttpGet("recent-shipments")]
+        public async Task<IActionResult> GetRecentShipments()
+        {
+            var recentShipments = await _dashboardService.GetRecentShipmentsAsync();
+            return Ok(recentShipments);
+        }
+
+        [HttpGet("product-distribution")]
+        public async Task<IActionResult> GetProductDistribution()
+        {
+            var productDistribution = await _dashboardService.GetProductDistributionAsync();
+            return Ok(productDistribution);
+        }
+
+        [HttpGet("sales-funnel")]
+        public async Task<IActionResult> GetSalesFunnel()
+        {
+            var salesFunnel = await _dashboardService.GetSalesFunnelAsync();
+            return Ok(salesFunnel);
         }
     }
 }

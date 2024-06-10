@@ -1,72 +1,104 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
-using API.Models;
 
 namespace API.Services
 {
-    public class DashboardService
+    public class DashboardService : IDashboardService
     {
-        private readonly string? _connectionString;
+        private readonly string _connectionString;
 
         public DashboardService(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException(nameof(_connectionString));
         }
 
-        public async Task<DashboardData> GetDashboardDataAsync()
+        public async Task<DashboardMetrics> GetMetricsAsync()
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
-                var dashboardData = new DashboardData();
+                var totalProducts = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Products");
+                var totalOrders = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Orders");
+                var totalCustomers = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Customers");
+                var totalShipments = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Shipments");
 
-                var opportunitiesQuery = "SELECT SUM(Quantity * UnitPrice) FROM OrderDetails";
-                dashboardData.Opportunities = await connection.QuerySingleAsync<decimal>(opportunitiesQuery);
-
-                var revenueTotalQuery = "SELECT SUM(Quantity * UnitPrice) FROM OrderDetails od JOIN Orders o ON od.OrderId = o.Id WHERE o.ShippedDate IS NOT NULL";
-                dashboardData.RevenueTotal = await connection.QuerySingleAsync<decimal>(revenueTotalQuery);
-
-                var leadsQuery = "SELECT COUNT(*) FROM Customers";
-                dashboardData.Leads = await connection.QuerySingleAsync<int>(leadsQuery);
-
-                var totalOrdersQuery = "SELECT COUNT(*) FROM Orders";
-                dashboardData.TotalOrders = await connection.QuerySingleAsync<int>(totalOrdersQuery);
-
-                dashboardData.Conversion = dashboardData.Leads > 0 ? (int)((double)dashboardData.TotalOrders / dashboardData.Leads * 100) : 0;
-
-                var revenueAnalysisQuery = @"
-                    SELECT 
-                        MONTH(OrderDate) AS Month, 
-                        SUM(od.Quantity * od.UnitPrice) AS Revenue 
-                    FROM Orders o 
-                    JOIN OrderDetails od ON o.Id = od.OrderId 
-                    GROUP BY MONTH(OrderDate)";
-                dashboardData.RevenueAnalysis = (await connection.QueryAsync<RevenueAnalysis>(revenueAnalysisQuery)).ToList();
-
-                dashboardData.ConversionFunnel = new List<ConversionFunnel>
+                return new DashboardMetrics
                 {
-                    new ConversionFunnel 
-                    { 
-                        Stage = "Sales", 
-                        Value = await connection.QuerySingleAsync<decimal>("SELECT SUM(Quantity * UnitPrice) FROM OrderDetails od JOIN Orders o ON od.OrderId = o.Id WHERE o.ShippedDate IS NOT NULL") 
-                    },
-                    new ConversionFunnel 
-                    { 
-                        Stage = "Quotes", 
-                        Value = await connection.QuerySingleAsync<decimal>("SELECT SUM(Quantity * UnitPrice) FROM OrderDetails") 
-                    },
-                    new ConversionFunnel 
-                    { 
-                        Stage = "Leads", 
-                        Value = dashboardData.Leads 
-                    }
+                    TotalProducts = totalProducts,
+                    TotalOrders = totalOrders,
+                    TotalCustomers = totalCustomers,
+                    TotalShipments = totalShipments
                 };
-
-                return dashboardData;
             }
         }
+
+        public async Task<IEnumerable<RecentOrder>> GetRecentOrdersAsync()
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                return await connection.QueryAsync<RecentOrder>("SELECT o.Id, o.OrderDate, c.Name AS CustomerName FROM Orders o JOIN Customers c ON o.CustomerId = c.Id ORDER BY o.OrderDate DESC LIMIT 5");
+            }
+        }
+
+        public async Task<IEnumerable<RecentShipment>> GetRecentShipmentsAsync()
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                return await connection.QueryAsync<RecentShipment>("SELECT s.Id, s.ShipmentDate, s.TrackingNumber FROM Shipments s ORDER BY s.ShipmentDate DESC LIMIT 5");
+            }
+        }
+
+        public async Task<IEnumerable<ProductDistribution>> GetProductDistributionAsync()
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                return await connection.QueryAsync<ProductDistribution>("SELECT p.Name AS ProductName, SUM(od.Quantity) AS Quantity FROM OrderDetails od JOIN Products p ON od.ProductId = p.Id GROUP BY p.Name");
+            }
+        }
+
+        public async Task<IEnumerable<SalesFunnelStage>> GetSalesFunnelAsync()
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                return await connection.QueryAsync<SalesFunnelStage>("SELECT Stage, COUNT(*) AS Count FROM SalesFunnel GROUP BY Stage");
+            }
+        }
+    }
+
+    public class DashboardMetrics
+    {
+        public int TotalProducts { get; set; }
+        public int TotalOrders { get; set; }
+        public int TotalCustomers { get; set; }
+        public int TotalShipments { get; set; }
+    }
+
+    public class RecentOrder
+    {
+        public int Id { get; set; }
+        public string OrderDate { get; set; } = string.Empty;
+        public string CustomerName { get; set; } = string.Empty;
+    }
+
+    public class RecentShipment
+    {
+        public int Id { get; set; }
+        public string ShipmentDate { get; set; } = string.Empty;
+        public string TrackingNumber { get; set; } = string.Empty;
+    }
+
+    public class ProductDistribution
+    {
+        public string ProductName { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+    }
+
+    public class SalesFunnelStage
+    {
+        public string Stage { get; set; } = string.Empty;
+        public int Count { get; set; }
     }
 }

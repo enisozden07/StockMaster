@@ -1,15 +1,15 @@
-import { TasksPage, ProfilePage, DashboardPage,  ProductManagementPage, CategoryManagementPage, OrderManagementPage, CustomerManagementPage, ShipmentManagementPage, SupplierManagementPage, WarehouseManagementPage } from './pages';
+import { ProfilePage, DashboardPage,  ProductManagementPage, CategoryManagementPage, OrderManagementPage, CustomerManagementPage, ShipmentManagementPage, SupplierManagementPage, WarehouseManagementPage } from './pages';
 import { withNavigationWatcher } from './contexts/navigation';
 
 const routes = [
-    {
-        path: '/tasks',
-        element: TasksPage
-    },
-    {
-        path: '/profile',
-        element: ProfilePage
-    },
+  {
+    path: '/',
+    element: DashboardPage
+  },
+  {
+      path: '/profile',
+      element: ProfilePage
+  },
   {
     path: '/dashboard',
     element: DashboardPage

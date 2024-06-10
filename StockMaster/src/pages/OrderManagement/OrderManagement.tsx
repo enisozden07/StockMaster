@@ -3,6 +3,7 @@ import api from '../../axiosConfig';
 import { DataGrid, Column, Editing, Popup, MasterDetail } from 'devextreme-react/data-grid';
 import 'devextreme/dist/css/dx.light.css';
 import { Order, OrderDetail, Customer, Product } from '../../models/models';
+import './OrderManagement.scss'
 
 const OrderManagement = () => {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -173,7 +174,7 @@ const OrderManagement = () => {
 
     return (
         <div>
-            <h1>Order Management</h1>
+            <h3>Order Management</h3>
             <DataGrid
                 dataSource={orders}
                 keyExpr="id"
