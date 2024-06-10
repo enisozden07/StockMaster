@@ -1,22 +1,23 @@
 .dashboard {
     padding: 20px;
-}
-
-.dashboard-cards {
+  }
+  
+  .dashboard-cards {
     flex: 1;
     margin: 0 10px;
     padding: 20px;
     background: #ffffffee;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.dashboard-metrics {
+  }
+  
+  .dashboard-metrics {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
-}
-
-.metric-card {
+  }
+  
+  .metric-card {
     flex: 1;
     margin: 0 10px;
     padding: 20px;
@@ -24,45 +25,51 @@
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     text-align: center;
-}
-
-.metric-card h5 {
+  }
+  
+  .metric-card h5 {
     margin: 0;
     font-size: 16px;
     color: #555;
-}
-
-.metric-card p {
+  }
+  
+  .metric-card p {
     margin: 10px 0 0;
     font-size: 24px;
     color: #333;
-}
-
-.dashboard-charts,
-.dashboard-grids {
+  }
+  
+  .dashboard-charts,
+  .dashboard-grids {
     display: flex;
     justify-content: space-between;
+    padding-bottom: 10px;
     margin-bottom: 20px;
-}
-
-.chart-container,
-.pie-container {
+  }
+  
+  .chart-container,
+  .pie-container,
+  .funnel-container {
     width: 48%;
     background: #ffffffee;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
-}
-
-#chart,
-#funnel,
-#pie {
+    padding-bottom: 30px;
+    margin-right: 5px;
+    margin-left: 5px;
+  }
+  
+  #chart,
+  #funnel,
+  #pie {
     width: 100%;
     height: 400px;
-}
-
-.custom-datagrid {
+  }
+  
+  .custom-datagrid {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     background: #ffffffee;
     border-radius: 8px;
-}
+  }
+  

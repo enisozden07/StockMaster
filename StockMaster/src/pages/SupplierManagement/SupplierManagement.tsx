@@ -54,7 +54,7 @@ const SupplierManagement = () => {
 
     return (
         <div>
-            <h1>Supplier Management</h1>
+            <h4>Supplier Management</h4>
             <DataGrid
                 dataSource={suppliers}
                 keyExpr="id"

@@ -92,7 +92,7 @@ const ShipmentManagement = () => {
 
     return (
         <div>
-            <h1>Shipment Management</h1>
+            <h4>Shipment Management</h4>
             <DataGrid
                 dataSource={shipments}
                 keyExpr="id"

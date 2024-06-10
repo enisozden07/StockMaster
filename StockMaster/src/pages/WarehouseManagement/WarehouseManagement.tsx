@@ -143,7 +143,7 @@ const WarehouseManagement = () => {
 
     return (
         <div>
-            <h1>Warehouse Management</h1>
+            <h4>Warehouse Management</h4>
             <DataGrid
                 dataSource={warehouses}
                 keyExpr="id"

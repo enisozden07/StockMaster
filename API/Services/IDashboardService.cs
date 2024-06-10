@@ -6,6 +6,6 @@ namespace API.Services
         Task<IEnumerable<RecentOrder>> GetRecentOrdersAsync();
         Task<IEnumerable<RecentShipment>> GetRecentShipmentsAsync();
         Task<IEnumerable<ProductDistribution>> GetProductDistributionAsync();
-        Task<IEnumerable<SalesFunnelStage>> GetSalesFunnelAsync();
+        Task<IEnumerable<SalesOverview>> GetSalesOverviewAsync();
     }
 }

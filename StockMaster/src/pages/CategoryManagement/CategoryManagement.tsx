@@ -58,7 +58,7 @@ const CategoryManagement = () => {
 
     return (
         <div>
-            <h1>Category Management</h1>
+            <h4>Category Management</h4>
             <DataGrid
                 dataSource={categories}
                 keyExpr="id"

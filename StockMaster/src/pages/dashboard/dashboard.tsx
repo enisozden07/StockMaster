@@ -3,7 +3,6 @@ import api from '../../axiosConfig';
 import DataGrid, { Column, Paging, Pager } from 'devextreme-react/data-grid';
 import Chart, { ArgumentAxis, ValueAxis, Series, Label, Legend, Export, Title, Tooltip } from 'devextreme-react/chart';
 import PieChart, { Series as PieSeries, Label as PieLabel, Connector, Size } from 'devextreme-react/pie-chart';
-import Funnel, { Label as FunnelLabel, Tooltip as FunnelTooltip } from 'devextreme-react/funnel';
 import 'devextreme/dist/css/dx.light.css';
 import './dashboard.scss'; 
 
@@ -19,13 +18,14 @@ const Dashboard = () => {
   const [recentShipments, setRecentShipments] = useState([]);
   const [productDistribution, setProductDistribution] = useState([]);
   const [salesFunnel, setSalesFunnel] = useState([]);
+  const [salesOverview, setSalesOverview] = useState([]);
 
   useEffect(() => {
     fetchMetrics();
     fetchRecentOrders();
     fetchRecentShipments();
     fetchProductDistribution();
-    fetchSalesFunnel();
+    fetchSalesOverview();
   }, []);
 
   const fetchMetrics = async () => {
@@ -64,12 +64,12 @@ const Dashboard = () => {
     }
   };
 
-  const fetchSalesFunnel = async () => {
+  const fetchSalesOverview = async () => {
     try {
-      const response = await api.get('/api/dashboard/sales-funnel');
-      setSalesFunnel(response.data);
+      const response = await api.get('/api/dashboard/sales-overview');
+      setSalesOverview(response.data);
     } catch (error) {
-      console.error('Error fetching sales funnel:', error);
+      console.error('Error fetching sales overview:', error);
     }
   };
 
@@ -95,8 +95,8 @@ const Dashboard = () => {
       </div>
 
       <div className="dashboard-charts">
-        <div id="chart">
-          <Chart dataSource={recentOrders} title="Sales Overview">
+        <div id="chart" className="chart-container">
+          <Chart dataSource={salesOverview} title="Sales Overview">
             <ArgumentAxis>
               <Label rotationAngle={45} overlappingBehavior="rotate" />
             </ArgumentAxis>
@@ -114,7 +114,7 @@ const Dashboard = () => {
           </Chart>
         </div>
 
-        <div id="pie">
+        <div id="pie" className="pie-container">
           <PieChart dataSource={productDistribution} type="doughnut">
             <PieSeries
               argumentField="productName"
@@ -129,25 +129,12 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="dashboard-grids">
-        <div id="funnel">
-          <Funnel id="funnel" dataSource={salesFunnel} valueField="count" argumentField="stage">
-            <FunnelLabel
-              visible={true}
-              position="inside"
-              format="fixedPoint"
-              customizeText={(itemInfo) => `${itemInfo.valueText} (${itemInfo.percentText})`}
-            />
-            <FunnelTooltip enabled={true} />
-          </Funnel>
-        </div>
-      </div>
-
       <h2>Recent Orders</h2>
       <DataGrid
         dataSource={recentOrders}
         showBorders={true}
         columnAutoWidth={true}
+        className="custom-datagrid"
       >
         <Column dataField="id" caption="Order ID" />
         <Column dataField="orderDate" caption="Order Date" dataType="date" format="yyyy-MM-dd" />
@@ -161,6 +148,7 @@ const Dashboard = () => {
         dataSource={recentShipments}
         showBorders={true}
         columnAutoWidth={true}
+        className="custom-datagrid"
       >
         <Column dataField="id" caption="Shipment ID" />
         <Column dataField="shipmentDate" caption="Shipment Date" dataType="date" format="yyyy-MM-dd" />

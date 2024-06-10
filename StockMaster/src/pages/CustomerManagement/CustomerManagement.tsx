@@ -54,7 +54,7 @@ const CustomerManagement = () => {
 
     return (
         <div>
-            <h1>Customer Management</h1>
+            <h4>Customer Management</h4>
             <DataGrid
                 dataSource={customers}
                 keyExpr="id"

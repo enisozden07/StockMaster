@@ -43,11 +43,11 @@ namespace API.Controllers
             return Ok(productDistribution);
         }
 
-        [HttpGet("sales-funnel")]
-        public async Task<IActionResult> GetSalesFunnel()
+        [HttpGet("sales-overview")]
+        public async Task<IActionResult> GetSalesOverview()
         {
-            var salesFunnel = await _dashboardService.GetSalesFunnelAsync();
-            return Ok(salesFunnel);
+            var salesOverview = await _dashboardService.GetSalesOverviewAsync();
+            return Ok(salesOverview);
         }
     }
 }

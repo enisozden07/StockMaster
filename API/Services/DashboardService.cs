@@ -59,13 +59,14 @@ namespace API.Services
             }
         }
 
-        public async Task<IEnumerable<SalesFunnelStage>> GetSalesFunnelAsync()
+        public async Task<IEnumerable<SalesOverview>> GetSalesOverviewAsync() 
+    {
+        using (var connection = new MySqlConnection(_connectionString))
         {
-            using (var connection = new MySqlConnection(_connectionString))
-            {
-                return await connection.QueryAsync<SalesFunnelStage>("SELECT Stage, COUNT(*) AS Count FROM SalesFunnel GROUP BY Stage");
-            }
+            var query = "SELECT OrderDate, COUNT(*) as OrderCount FROM Orders GROUP BY OrderDate ORDER BY OrderDate";
+            return await connection.QueryAsync<SalesOverview>(query);
         }
+    }
     }
 
     public class DashboardMetrics
@@ -96,9 +97,10 @@ namespace API.Services
         public int Quantity { get; set; }
     }
 
-    public class SalesFunnelStage
-    {
-        public string Stage { get; set; } = string.Empty;
-        public int Count { get; set; }
-    }
+    public class SalesOverview
+{
+    public DateTime OrderDate { get; set; }
+    public int OrderCount { get; set; }
+}
+
 }
